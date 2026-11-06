@@ -89,3 +89,4 @@ npm run catalogue
 That reads `../ones_all_videos.csv` and `../ones_materials_manifest.csv` and rewrites
 `data/catalogue.json`. Watch progress is keyed by video id, so it survives rebuilds.
 "# class-hub" 
+"# class-hub" 
