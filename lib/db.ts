@@ -17,6 +17,8 @@ export type User = {
   sessionId?: string | null;
   sessionStartedAt?: number | null;
   sessionUserAgent?: string | null;
+  /** Admins only: every device signed in. Regular users keep just `sessionId`. */
+  adminSessionIds?: string[] | null;
 };
 
 type Store = {
@@ -131,6 +133,7 @@ function normalizeUser(raw: Partial<User>): User {
     sessionId: raw.sessionId ?? null,
     sessionStartedAt: raw.sessionStartedAt ?? null,
     sessionUserAgent: raw.sessionUserAgent ?? null,
+    adminSessionIds: Array.isArray(raw.adminSessionIds) ? raw.adminSessionIds.map(String) : null,
   };
 }
 
@@ -302,15 +305,13 @@ export async function createUser(input: {
   return user;
 }
 
-export async function updateUserPassword(userId: string, password: string): Promise<boolean> {
+/** Loads one user, applies `change`, and saves it, on whichever backend is active. */
+async function mutateUser(userId: string, change: (user: User) => void): Promise<boolean> {
   requireBackend();
   if (usingRemoteStore()) {
     const user = await remoteFindUserById(userId);
     if (!user) return false;
-    user.hash = hashPassword(password);
-    user.sessionId = null;
-    user.sessionStartedAt = null;
-    user.sessionUserAgent = null;
+    change(user);
     await remoteSaveUser(user);
     return true;
   }
@@ -318,31 +319,32 @@ export async function updateUserPassword(userId: string, password: string): Prom
   const store = readLocalStore();
   const user = store.users.find((u) => u.id === userId);
   if (!user) return false;
-  user.hash = hashPassword(password);
-  // force a fresh sign-in everywhere after a password reset
-  user.sessionId = null;
-  user.sessionStartedAt = null;
-  user.sessionUserAgent = null;
+  change(user);
   writeLocalStore(store);
   return true;
 }
 
-export async function setUserRole(userId: string, role: UserRole): Promise<boolean> {
-  requireBackend();
-  if (usingRemoteStore()) {
-    const user = await remoteFindUserById(userId);
-    if (!user) return false;
-    user.role = role;
-    await remoteSaveUser(user);
-    return true;
-  }
+function signOutEverywhere(user: User) {
+  user.sessionId = null;
+  user.sessionStartedAt = null;
+  user.sessionUserAgent = null;
+  user.adminSessionIds = null;
+}
 
-  const store = readLocalStore();
-  const user = store.users.find((u) => u.id === userId);
-  if (!user) return false;
-  user.role = role;
-  writeLocalStore(store);
-  return true;
+export async function updateUserPassword(userId: string, password: string): Promise<boolean> {
+  return mutateUser(userId, (user) => {
+    user.hash = hashPassword(password);
+    // force a fresh sign-in everywhere after a password reset
+    signOutEverywhere(user);
+  });
+}
+
+export async function setUserRole(userId: string, role: UserRole): Promise<boolean> {
+  return mutateUser(userId, (user) => {
+    // A demoted admin drops back to one device: keep only the newest session.
+    if (user.role === "admin" && role !== "admin") user.adminSessionIds = null;
+    user.role = role;
+  });
 }
 
 export async function countAdmins(): Promise<number> {
@@ -369,48 +371,51 @@ export async function deleteUser(userId: string): Promise<boolean> {
   return true;
 }
 
+// Admins may stay signed in on this many devices; a further sign-in drops the
+// oldest one (first in, first out).
+const MAX_ADMIN_SESSIONS = 3;
+
+/** True when `sessionId` is a live session for this user. */
+export function hasActiveSession(user: User, sessionId: string): boolean {
+  if (user.role === "admin" && user.adminSessionIds?.includes(sessionId)) return true;
+  return Boolean(user.sessionId) && user.sessionId === sessionId;
+}
+
+/**
+ * Records a sign-in. Regular users get exactly one session, so this replaces
+ * (signs out) the previous device. Admins keep a session per device.
+ */
 export async function setUserSession(userId: string, sessionId: string, userAgent?: string | null) {
-  requireBackend();
-  if (usingRemoteStore()) {
-    const user = await remoteFindUserById(userId);
-    if (!user) return;
+  await mutateUser(userId, (user) => {
+    if (user.role === "admin") {
+      const existing = user.adminSessionIds ?? (user.sessionId ? [user.sessionId] : []);
+      user.adminSessionIds = [...existing, sessionId].slice(-MAX_ADMIN_SESSIONS);
+    } else {
+      user.adminSessionIds = null;
+    }
     user.sessionId = sessionId;
     user.sessionStartedAt = Date.now();
     user.lastLoginAt = Date.now();
     user.sessionUserAgent = userAgent ? userAgent.slice(0, 160) : null;
-    await remoteSaveUser(user);
-    return;
-  }
-
-  const store = readLocalStore();
-  const user = store.users.find((u) => u.id === userId);
-  if (!user) return;
-  user.sessionId = sessionId;
-  user.sessionStartedAt = Date.now();
-  user.lastLoginAt = Date.now();
-  user.sessionUserAgent = userAgent ? userAgent.slice(0, 160) : null;
-  writeLocalStore(store);
+  });
 }
 
+/** Signs the account out on every device. */
 export async function clearUserSession(userId: string) {
-  requireBackend();
-  if (usingRemoteStore()) {
-    const user = await remoteFindUserById(userId);
-    if (!user) return;
-    user.sessionId = null;
-    user.sessionStartedAt = null;
-    user.sessionUserAgent = null;
-    await remoteSaveUser(user);
-    return;
-  }
+  await mutateUser(userId, signOutEverywhere);
+}
 
-  const store = readLocalStore();
-  const user = store.users.find((u) => u.id === userId);
-  if (!user) return;
-  user.sessionId = null;
-  user.sessionStartedAt = null;
-  user.sessionUserAgent = null;
-  writeLocalStore(store);
+/** Ends one device's session (logout). Other admin devices stay signed in. */
+export async function endUserSession(userId: string, sessionId: string) {
+  await mutateUser(userId, (user) => {
+    const remaining = (user.adminSessionIds ?? []).filter((id) => id !== sessionId);
+    if (user.role === "admin" && remaining.length > 0) {
+      user.adminSessionIds = remaining;
+      if (user.sessionId === sessionId) user.sessionId = remaining[remaining.length - 1];
+      return;
+    }
+    if (user.sessionId === sessionId) signOutEverywhere(user);
+  });
 }
 
 export async function getProgress(userId: string): Promise<Record<string, ProgressEntry>> {

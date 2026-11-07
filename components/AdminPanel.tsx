@@ -103,7 +103,7 @@ export default function AdminPanel({
       <div className="card" style={{ marginBottom: 22 }}>
         <h2 style={{ marginBottom: 4 }}>Add a user</h2>
         <p className="tiny" style={{ marginTop: 0, marginBottom: 16 }}>
-          Give someone their own login. Each account can be signed in on one device at a time.
+          Give someone their own login. Each user account can be signed in on one device at a time; admins on up to three.
         </p>
         <form onSubmit={createUser} className="admin-form">
           <div className="field" style={{ margin: 0 }}>

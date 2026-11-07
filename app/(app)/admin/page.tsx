@@ -50,7 +50,7 @@ export default async function AdminPage() {
           <div className="eyebrow">Admin</div>
           <h1>User accounts</h1>
           <p className="sub">
-            {rows.length} {rows.length === 1 ? "account" : "accounts"} · {online} signed in right now · one device per account
+            {rows.length} {rows.length === 1 ? "account" : "accounts"} · {online} signed in right now · one device per user, three per admin
           </p>
         </div>
       </div>

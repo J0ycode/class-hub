@@ -4,7 +4,7 @@ import path from "node:path";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { findUserById, type User } from "./db";
+import { findUserById, hasActiveSession, type User } from "./db";
 
 const COOKIE = "ch_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
@@ -64,23 +64,26 @@ export function verifyToken(token: string | undefined): TokenPayload | null {
 
 /**
  * Resolves the session and tells us whether it was superseded by a login
- * elsewhere. A user has exactly one active session: signing in on another
- * device replaces the stored session id, and every older cookie stops matching.
+ * elsewhere. A regular user has exactly one active session: signing in on
+ * another device replaces the stored session id, and the older cookie stops
+ * matching. Admins may be signed in on several devices at once.
  */
 // cache(): the layout and the page both resolve the session; within one request
 // this runs once, saving the duplicate database round trips.
-export const getSessionState = cache(async (): Promise<{ user: User | null; kicked: boolean }> => {
-  const store = await cookies();
-  const payload = verifyToken(store.get(COOKIE)?.value);
-  if (!payload) return { user: null, kicked: false };
+export const getSessionState = cache(
+  async (): Promise<{ user: User | null; kicked: boolean; sessionId: string | null }> => {
+    const store = await cookies();
+    const payload = verifyToken(store.get(COOKIE)?.value);
+    if (!payload) return { user: null, kicked: false, sessionId: null };
 
-  const user = await findUserById(payload.userId);
-  if (!user) return { user: null, kicked: false };
-  if (!user.sessionId || user.sessionId !== payload.sessionId) {
-    return { user: null, kicked: true };
-  }
-  return { user, kicked: false };
-});
+    const user = await findUserById(payload.userId);
+    if (!user) return { user: null, kicked: false, sessionId: null };
+    if (!hasActiveSession(user, payload.sessionId)) {
+      return { user: null, kicked: true, sessionId: null };
+    }
+    return { user, kicked: false, sessionId: payload.sessionId };
+  },
+);
 
 export async function getSessionUser(): Promise<User | null> {
   return (await getSessionState()).user;

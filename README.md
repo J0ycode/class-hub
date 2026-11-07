@@ -39,9 +39,11 @@ variables. Running locally without `SEED_ADMIN_PASSWORD`, a random password is
 generated and printed once in the server console. Hosted deployments require
 `SEED_ADMIN_PASSWORD`. Change the password from the admin panel after signing in.
 
-- **One device per account.** Signing in replaces the account's active session, so a
+- **One device per user.** Signing in replaces the account's active session, so a
   previously signed-in device is signed out on its next page load (it lands on the
-  login screen with a notice). This applies to every account, admin included.
+  login screen with a notice).
+- **Up to three devices per admin.** A fourth sign-in signs out the admin's oldest
+  device (first in, first out). Signing out ends only that device's session.
 - Admins can add users, reset passwords, promote/demote admins, force-sign-out a
   device and delete accounts from **Admin** in the sidebar.
 - Passwords are hashed with **scrypt**, never stored in plain text.
