@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { activeDeviceCount, createUser, deviceLimit, findUserByName, listUsers, type UserRole } from "@/lib/db";
+import { activeDeviceCount, createUser, deviceLimit, findUserByName, listUsers, parseRole, type UserRole } from "@/lib/db";
 import { getApiUser } from "@/lib/auth";
 
 export const runtime = "nodejs";
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
   const username = (body.username ?? "").trim();
   const displayName = (body.displayName ?? "").trim() || username;
   const password = body.password ?? "";
-  const role: UserRole = body.role === "admin" ? "admin" : "user";
+  const role: UserRole = parseRole(body.role);
 
   if (!/^[a-zA-Z0-9._-]{3,32}$/.test(username)) {
     return NextResponse.json(

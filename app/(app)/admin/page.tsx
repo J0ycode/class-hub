@@ -40,7 +40,8 @@ export default async function AdminPage() {
   );
 
   rows.sort((a, b) => {
-    if (a.role !== b.role) return a.role === "admin" ? -1 : 1;
+    const rank = { admin: 0, moderator: 1, user: 2 } as const;
+    if (a.role !== b.role) return rank[a.role] - rank[b.role];
     return a.username.localeCompare(b.username);
   });
 

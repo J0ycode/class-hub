@@ -8,7 +8,7 @@ export type AdminUserRow = {
   id: string;
   username: string;
   displayName: string;
-  role: "admin" | "user";
+  role: "admin" | "moderator" | "user";
   createdAt: number;
   lastLoginAt: number | null;
   online: boolean;
@@ -155,6 +155,7 @@ export default function AdminPanel({
               onChange={(e) => setForm({ ...form, role: e.target.value })}
             >
               <option value="user">User</option>
+              <option value="moderator">Moderator</option>
               <option value="admin">Admin</option>
             </select>
           </div>
@@ -181,6 +182,7 @@ export default function AdminPanel({
                 <div className="row-between" style={{ justifyContent: "flex-start", gap: 8 }}>
                   <span style={{ fontWeight: 600, fontSize: 14 }}>{u.displayName}</span>
                   {u.role === "admin" ? <span className="chip gold">admin</span> : null}
+                  {u.role === "moderator" ? <span className="chip accent">moderator</span> : null}
                   {self ? <span className="chip">you</span> : null}
                 </div>
                 <div className="tiny">@{u.username} · joined {timeAgo(u.createdAt)}</div>
@@ -229,13 +231,20 @@ export default function AdminPanel({
                   Reset password
                 </button>
                 {!self ? (
-                  <button
-                    className="btn sm ghost"
-                    disabled={busy}
-                    onClick={() => act(u.id, "role", { role: u.role === "admin" ? "user" : "admin" })}
-                  >
-                    {u.role === "admin" ? "Make user" : "Make admin"}
-                  </button>
+                  <label className="device-select">
+                    <span>Role</span>
+                    <select
+                      className="input"
+                      disabled={busy}
+                      value={u.role}
+                      aria-label={`Role for ${u.username}`}
+                      onChange={(e) => act(u.id, "role", { role: e.target.value })}
+                    >
+                      <option value="user">User</option>
+                      <option value="moderator">Moderator</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </label>
                 ) : null}
                 {!self ? (
                   <button className="btn sm danger" disabled={busy} onClick={() => removeUser(u)}>

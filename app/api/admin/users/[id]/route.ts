@@ -6,6 +6,7 @@ import {
   findUserById,
   MAX_DEVICE_LIMIT,
   setUserDeviceLimit,
+  parseRole,
   setUserRole,
   updateUserPassword,
   type UserRole,
@@ -62,7 +63,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   }
 
   if (body.action === "role") {
-    const role: UserRole = body.role === "admin" ? "admin" : "user";
+    const role: UserRole = parseRole(body.role);
     if (target.role === "admin" && role !== "admin" && (await countAdmins()) <= 1) {
       return NextResponse.json({ error: "There must be at least one admin." }, { status: 400 });
     }

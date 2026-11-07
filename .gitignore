@@ -6,6 +6,7 @@ node_modules/
 data/store.json
 data/secret.key
 data/blob-uploaded.json
+data/teacher/
 
 # local environment
 .env

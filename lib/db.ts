@@ -4,7 +4,28 @@ import path from "node:path";
 import { hashPassword, newUserId } from "./password";
 import type { ProgressEntry } from "./types";
 
-export type UserRole = "admin" | "user";
+export type UserRole = "admin" | "moderator" | "user";
+
+/** Coerces any stored or submitted value to a valid role (unknown -> "user"). */
+export function parseRole(value: unknown): UserRole {
+  return value === "admin" || value === "moderator" ? value : "user";
+}
+
+/** Admins and moderators may upload and remove teacher materials. */
+export function canManageMaterials(user: { role: UserRole }): boolean {
+  return user.role === "admin" || user.role === "moderator";
+}
+
+/** A PDF uploaded by a moderator/admin into a subject's module folder. */
+export type TeacherNote = {
+  id: string;
+  subjectId: string;
+  module: number; // 1-4
+  title: string;
+  size: number;
+  uploadedBy: string; // username
+  uploadedAt: number;
+};
 
 export type User = {
   id: string;
@@ -26,6 +47,7 @@ export type User = {
 type Store = {
   users: User[];
   progress: Record<string, Record<string, ProgressEntry>>;
+  teacherNotes: TeacherNote[];
 };
 
 const dataDir = path.join(process.cwd(), "data");
@@ -104,7 +126,7 @@ function requireBackend() {
  * ------------------------------------------------------------------ */
 
 function emptyStore(): Store {
-  return { users: [], progress: {} };
+  return { users: [], progress: {}, teacherNotes: [] };
 }
 
 function seedAdminUser(): User {
@@ -129,7 +151,7 @@ function normalizeUser(raw: Partial<User>): User {
     username: String(raw.username ?? ""),
     displayName: String(raw.displayName ?? raw.username ?? ""),
     hash: String(raw.hash ?? ""),
-    role: raw.role === "admin" ? "admin" : "user",
+    role: parseRole(raw.role),
     createdAt: Number(raw.createdAt) || Date.now(),
     lastLoginAt: raw.lastLoginAt ?? null,
     sessionId: raw.sessionId ?? null,
@@ -164,6 +186,7 @@ function readLocalStore(): Store {
   const store: Store = {
     users: Array.isArray(parsed.users) ? parsed.users.map((u) => normalizeUser(u)) : [],
     progress: parsed.progress && typeof parsed.progress === "object" ? parsed.progress : {},
+    teacherNotes: Array.isArray(parsed.teacherNotes) ? parsed.teacherNotes : [],
   };
 
   if (store.users.length === 0) {
@@ -612,4 +635,72 @@ export async function clearFailedLogins(key: string): Promise<void> {
     return;
   }
   localAttempts.delete(key);
+}
+
+/* ------------------------------------------------------------------ *
+ * Teacher materials (metadata only; the PDF bytes live in lib/teacherFiles)
+ *
+ * Hosted: ch:teacher hash  noteId -> TeacherNote JSON
+ * Local:  store.json "teacherNotes" array
+ * ------------------------------------------------------------------ */
+
+const K_TEACHER = "ch:teacher";
+
+export async function listTeacherNotes(subjectId?: string): Promise<TeacherNote[]> {
+  requireBackend();
+  let notes: TeacherNote[];
+  if (usingRemoteStore()) {
+    const flat = await redis<string[]>(["HGETALL", K_TEACHER]);
+    notes = [];
+    for (let i = 0; i + 1 < (flat?.length ?? 0); i += 2) {
+      try {
+        notes.push(JSON.parse(flat[i + 1]) as TeacherNote);
+      } catch {
+        /* skip malformed rows */
+      }
+    }
+  } else {
+    notes = readLocalStore().teacherNotes;
+  }
+  return notes
+    .filter((n) => !subjectId || n.subjectId === subjectId)
+    .sort((a, b) => a.module - b.module || a.uploadedAt - b.uploadedAt);
+}
+
+export async function findTeacherNote(id: string): Promise<TeacherNote | undefined> {
+  requireBackend();
+  if (usingRemoteStore()) {
+    const raw = await redis<string | null>(["HGET", K_TEACHER, id]);
+    if (!raw) return undefined;
+    try {
+      return JSON.parse(raw) as TeacherNote;
+    } catch {
+      return undefined;
+    }
+  }
+  return readLocalStore().teacherNotes.find((n) => n.id === id);
+}
+
+export async function addTeacherNote(note: TeacherNote): Promise<void> {
+  requireBackend();
+  if (usingRemoteStore()) {
+    await redis(["HSET", K_TEACHER, note.id, JSON.stringify(note)]);
+    return;
+  }
+  const store = readLocalStore();
+  store.teacherNotes.push(note);
+  writeLocalStore(store);
+}
+
+export async function deleteTeacherNote(id: string): Promise<boolean> {
+  requireBackend();
+  if (usingRemoteStore()) {
+    return (await redis<number>(["HDEL", K_TEACHER, id])) > 0;
+  }
+  const store = readLocalStore();
+  const before = store.teacherNotes.length;
+  store.teacherNotes = store.teacherNotes.filter((n) => n.id !== id);
+  if (store.teacherNotes.length === before) return false;
+  writeLocalStore(store);
+  return true;
 }
