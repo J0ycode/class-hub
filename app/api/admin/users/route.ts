@@ -54,14 +54,24 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  if (await findUserByName(username)) {
-    return NextResponse.json({ error: "That username is already taken." }, { status: 409 });
-  }
   if (password.length < 8) {
     return NextResponse.json({ error: "Password must be at least 8 characters." }, { status: 400 });
   }
 
-  const user = await createUser({ username, displayName, password, role });
+  let user;
+  try {
+    if (await findUserByName(username)) {
+      return NextResponse.json({ error: "That username is already taken." }, { status: 409 });
+    }
+    user = await createUser({ username, displayName, password, role });
+  } catch (err) {
+    // Full detail goes to the server log only; the browser gets a fixed message.
+    console.error("[admin] create user failed", err);
+    return NextResponse.json(
+      { error: "Could not create the account. Check the server logs for details." },
+      { status: 500 },
+    );
+  }
   return NextResponse.json({
     ok: true,
     user: {
