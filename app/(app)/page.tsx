@@ -4,6 +4,7 @@ import { getProgress } from "@/lib/db";
 import { allVideos, getCatalogue } from "@/lib/catalogue";
 import { fmtDuration, fmtHours, subjectStats, timeAgo } from "@/lib/format";
 import { dailyQuote, greeting, studyStreak } from "@/lib/study";
+import SubjectSticker from "@/components/SubjectSticker";
 
 export const dynamic = "force-dynamic";
 
@@ -193,7 +194,8 @@ export default async function DashboardPage() {
           return (
             <Link key={s.id} href={`/subjects/${s.id}`} className="card subject-card">
               <div className="subject-top">
-                <div>
+                <SubjectSticker name={s.name} code={s.code} />
+                <div className="subject-text">
                   <div className="subject-name">{s.name}</div>
                   <div className="subject-meta">
                     {s.modules.length} modules · {s.videoCount} videos · {fmtHours(s.totalSeconds)}

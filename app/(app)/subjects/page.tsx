@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { getProgress } from "@/lib/db";
 import { getCatalogue } from "@/lib/catalogue";
 import { fmtHours, subjectStats } from "@/lib/format";
+import SubjectSticker from "@/components/SubjectSticker";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,8 @@ export default async function SubjectsPage() {
           return (
             <Link key={s.id} href={`/subjects/${s.id}`} className="card subject-card">
               <div className="subject-top">
-                <div>
+                <SubjectSticker name={s.name} code={s.code} />
+                <div className="subject-text">
                   <div className="subject-name">{s.name}</div>
                   <div className="subject-meta">
                     {s.modules.map((m) => m.name).join(" · ")}

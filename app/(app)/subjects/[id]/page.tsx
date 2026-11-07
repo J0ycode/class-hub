@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { getProgress } from "@/lib/db";
 import { getCatalogue, notesForModule } from "@/lib/catalogue";
 import { fmtDuration, fmtHours, moduleStats, subjectStats } from "@/lib/format";
+import SubjectSticker from "@/components/SubjectSticker";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,7 @@ export default async function SubjectPage({
     <>
       <div className="page-head">
         <div>
+          <SubjectSticker name={subject.name} code={subject.code} size="lg" />
           <div className="eyebrow">
             <Link href="/subjects" style={{ color: "inherit" }}>
               Subjects

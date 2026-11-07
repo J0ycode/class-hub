@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { getCatalogue } from "@/lib/catalogue";
 import { notesLibrary } from "@/lib/notes";
+import SubjectSticker from "@/components/SubjectSticker";
 
 export const dynamic = "force-dynamic";
 
@@ -23,6 +24,7 @@ export default async function SubjectNotesPage({ params }: { params: Promise<{ i
 
       <div className="page-head">
         <div>
+          <SubjectSticker name={subject.name} code={subject.code} size="lg" />
           <div className="eyebrow">Notes{subject.code ? ` · ${subject.code}` : ""}</div>
           <h1>{subject.name}</h1>
           <p className="sub">
