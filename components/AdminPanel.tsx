@@ -12,6 +12,12 @@ export type AdminUserRow = {
   createdAt: number;
   lastLoginAt: number | null;
   online: boolean;
+  /** Devices signed in right now. */
+  devices: number;
+  /** Effective limit (custom or role default). */
+  deviceLimit: number;
+  /** Admin-set limit, or null when the role default applies. */
+  customLimit: number | null;
   done: number;
   watchedSeconds: number;
 };
@@ -182,6 +188,9 @@ export default function AdminPanel({
 
               <div>
                 {u.online ? <span className="chip good">signed in</span> : <span className="chip">offline</span>}
+                <div className="tiny" style={{ marginTop: 6 }}>
+                  {u.devices}/{u.deviceLimit} {u.deviceLimit === 1 ? "device" : "devices"}
+                </div>
               </div>
 
               <div className="tiny">
@@ -192,9 +201,28 @@ export default function AdminPanel({
               <div className="tiny">{u.lastLoginAt ? timeAgo(u.lastLoginAt) : "never"}</div>
 
               <div className="admin-actions">
+                <label className="device-select">
+                  <span>Devices</span>
+                  <select
+                    className="input"
+                    disabled={busy}
+                    value={u.customLimit ?? ""}
+                    aria-label={`Device limit for ${u.username}`}
+                    onChange={(e) =>
+                      act(u.id, "deviceLimit", { limit: e.target.value === "" ? null : Number(e.target.value) })
+                    }
+                  >
+                    <option value="">Default ({u.role === "admin" ? 3 : 1})</option>
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </label>
                 {u.online ? (
                   <button className="btn sm ghost" disabled={busy} onClick={() => act(u.id, "signOut")}>
-                    Sign out device
+                    Sign out all devices
                   </button>
                 ) : null}
                 <button className="btn sm ghost" disabled={busy} onClick={() => resetPassword(u)}>

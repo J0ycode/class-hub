@@ -4,6 +4,8 @@ import {
   countAdmins,
   deleteUser,
   findUserById,
+  MAX_DEVICE_LIMIT,
+  setUserDeviceLimit,
   setUserRole,
   updateUserPassword,
   type UserRole,
@@ -27,7 +29,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   const target = await findUserById(id);
   if (!target) return NextResponse.json({ error: "User not found." }, { status: 404 });
 
-  let body: { action?: string; password?: string; role?: string };
+  let body: { action?: string; password?: string; role?: string; limit?: number | string | null };
   try {
     body = await req.json();
   } catch {
@@ -45,6 +47,17 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
 
   if (body.action === "signOut") {
     await clearUserSession(id);
+    return NextResponse.json({ ok: true });
+  }
+
+  if (body.action === "deviceLimit") {
+    // null resets to the role default; otherwise a whole number 1–MAX_DEVICE_LIMIT.
+    const raw = body.limit;
+    const limit = raw === null || raw === undefined || raw === "" ? null : Number(raw);
+    if (limit !== null && (!Number.isInteger(limit) || limit < 1 || limit > MAX_DEVICE_LIMIT)) {
+      return NextResponse.json({ error: `Device limit must be 1–${MAX_DEVICE_LIMIT}.` }, { status: 400 });
+    }
+    await setUserDeviceLimit(id, limit);
     return NextResponse.json({ ok: true });
   }
 

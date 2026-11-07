@@ -17,8 +17,10 @@ export type User = {
   sessionId?: string | null;
   sessionStartedAt?: number | null;
   sessionUserAgent?: string | null;
-  /** Admins only: every device signed in. Regular users keep just `sessionId`. */
-  adminSessionIds?: string[] | null;
+  /** Every device currently signed in, oldest first. */
+  sessionIds?: string[] | null;
+  /** Per-user device limit set by an admin; null uses the role default. */
+  maxSessions?: number | null;
 };
 
 type Store = {
@@ -133,7 +135,13 @@ function normalizeUser(raw: Partial<User>): User {
     sessionId: raw.sessionId ?? null,
     sessionStartedAt: raw.sessionStartedAt ?? null,
     sessionUserAgent: raw.sessionUserAgent ?? null,
-    adminSessionIds: Array.isArray(raw.adminSessionIds) ? raw.adminSessionIds.map(String) : null,
+    // `adminSessionIds` is the field name used before per-user limits existed.
+    sessionIds: Array.isArray(raw.sessionIds)
+      ? raw.sessionIds.map(String)
+      : Array.isArray((raw as { adminSessionIds?: unknown }).adminSessionIds)
+        ? ((raw as { adminSessionIds: unknown[] }).adminSessionIds).map(String)
+        : null,
+    maxSessions: clampLimit(raw.maxSessions),
   };
 }
 
@@ -328,7 +336,7 @@ function signOutEverywhere(user: User) {
   user.sessionId = null;
   user.sessionStartedAt = null;
   user.sessionUserAgent = null;
-  user.adminSessionIds = null;
+  user.sessionIds = null;
 }
 
 export async function updateUserPassword(userId: string, password: string): Promise<boolean> {
@@ -341,9 +349,9 @@ export async function updateUserPassword(userId: string, password: string): Prom
 
 export async function setUserRole(userId: string, role: UserRole): Promise<boolean> {
   return mutateUser(userId, (user) => {
-    // A demoted admin drops back to one device: keep only the newest session.
-    if (user.role === "admin" && role !== "admin") user.adminSessionIds = null;
     user.role = role;
+    // The role default may be lower now (admin 3 -> user 1): drop the oldest devices.
+    trimSessions(user);
   });
 }
 
@@ -371,28 +379,58 @@ export async function deleteUser(userId: string): Promise<boolean> {
   return true;
 }
 
-// Admins may stay signed in on this many devices; a further sign-in drops the
-// oldest one (first in, first out).
-const MAX_ADMIN_SESSIONS = 3;
+/* Device limits: a sign-in beyond the limit signs out the oldest device
+ * (first in, first out). Admins can set a per-user limit; otherwise users get
+ * one device and admins three. */
+export const DEFAULT_USER_DEVICES = 1;
+export const DEFAULT_ADMIN_DEVICES = 3;
+export const MAX_DEVICE_LIMIT = 10;
+
+function clampLimit(value: unknown): number | null {
+  const n = Number(value);
+  if (value === null || value === undefined || !Number.isInteger(n) || n < 1) return null;
+  return Math.min(n, MAX_DEVICE_LIMIT);
+}
+
+/** How many devices this account may be signed in on at once. */
+export function deviceLimit(user: User): number {
+  return user.maxSessions ?? (user.role === "admin" ? DEFAULT_ADMIN_DEVICES : DEFAULT_USER_DEVICES);
+}
+
+function currentSessions(user: User): string[] {
+  return user.sessionIds ?? (user.sessionId ? [user.sessionId] : []);
+}
+
+/** Number of devices currently signed in. */
+export function activeDeviceCount(user: User): number {
+  return currentSessions(user).length;
+}
+
+/** Drops the oldest sessions until the account is within its limit. */
+function trimSessions(user: User) {
+  const kept = currentSessions(user).slice(-deviceLimit(user));
+  if (kept.length === 0) return signOutEverywhere(user);
+  user.sessionIds = kept;
+  if (!user.sessionId || !kept.includes(user.sessionId)) user.sessionId = kept[kept.length - 1];
+}
+
+/** Sets a per-user device limit (1–10), or null to use the role default. */
+export async function setUserDeviceLimit(userId: string, limit: number | null): Promise<boolean> {
+  return mutateUser(userId, (user) => {
+    user.maxSessions = clampLimit(limit);
+    trimSessions(user);
+  });
+}
 
 /** True when `sessionId` is a live session for this user. */
 export function hasActiveSession(user: User, sessionId: string): boolean {
-  if (user.role === "admin" && user.adminSessionIds?.includes(sessionId)) return true;
-  return Boolean(user.sessionId) && user.sessionId === sessionId;
+  return currentSessions(user).includes(sessionId);
 }
 
-/**
- * Records a sign-in. Regular users get exactly one session, so this replaces
- * (signs out) the previous device. Admins keep a session per device.
- */
+/** Records a sign-in, signing out the oldest device if the limit is exceeded. */
 export async function setUserSession(userId: string, sessionId: string, userAgent?: string | null) {
   await mutateUser(userId, (user) => {
-    if (user.role === "admin") {
-      const existing = user.adminSessionIds ?? (user.sessionId ? [user.sessionId] : []);
-      user.adminSessionIds = [...existing, sessionId].slice(-MAX_ADMIN_SESSIONS);
-    } else {
-      user.adminSessionIds = null;
-    }
+    user.sessionIds = [...currentSessions(user), sessionId].slice(-deviceLimit(user));
     user.sessionId = sessionId;
     user.sessionStartedAt = Date.now();
     user.lastLoginAt = Date.now();
@@ -405,16 +443,13 @@ export async function clearUserSession(userId: string) {
   await mutateUser(userId, signOutEverywhere);
 }
 
-/** Ends one device's session (logout). Other admin devices stay signed in. */
+/** Ends one device's session (logout). The account's other devices stay signed in. */
 export async function endUserSession(userId: string, sessionId: string) {
   await mutateUser(userId, (user) => {
-    const remaining = (user.adminSessionIds ?? []).filter((id) => id !== sessionId);
-    if (user.role === "admin" && remaining.length > 0) {
-      user.adminSessionIds = remaining;
-      if (user.sessionId === sessionId) user.sessionId = remaining[remaining.length - 1];
-      return;
-    }
-    if (user.sessionId === sessionId) signOutEverywhere(user);
+    const remaining = currentSessions(user).filter((id) => id !== sessionId);
+    if (remaining.length === 0) return signOutEverywhere(user);
+    user.sessionIds = remaining;
+    if (user.sessionId === sessionId) user.sessionId = remaining[remaining.length - 1];
   });
 }
 

@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/auth";
-import { getProgress, listUsers } from "@/lib/db";
+import { activeDeviceCount, deviceLimit, getProgress, listUsers } from "@/lib/db";
 import { allVideos, getCatalogue } from "@/lib/catalogue";
 import AdminPanel, { type AdminUserRow } from "@/components/AdminPanel";
 
@@ -29,7 +29,10 @@ export default async function AdminPage() {
         role: u.role,
         createdAt: u.createdAt,
         lastLoginAt: u.lastLoginAt ?? null,
-        online: !!u.sessionId,
+        online: activeDeviceCount(u) > 0,
+        devices: activeDeviceCount(u),
+        deviceLimit: deviceLimit(u),
+        customLimit: u.maxSessions ?? null,
         done,
         watchedSeconds,
       };
@@ -50,7 +53,7 @@ export default async function AdminPage() {
           <div className="eyebrow">Admin</div>
           <h1>User accounts</h1>
           <p className="sub">
-            {rows.length} {rows.length === 1 ? "account" : "accounts"} · {online} signed in right now · one device per user, three per admin
+            {rows.length} {rows.length === 1 ? "account" : "accounts"} · {online} signed in right now · device limits set per account
           </p>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createUser, findUserByName, listUsers, type UserRole } from "@/lib/db";
+import { activeDeviceCount, createUser, deviceLimit, findUserByName, listUsers, type UserRole } from "@/lib/db";
 import { getApiUser } from "@/lib/auth";
 
 export const runtime = "nodejs";
@@ -24,7 +24,9 @@ export async function GET() {
       role: u.role,
       createdAt: u.createdAt,
       lastLoginAt: u.lastLoginAt ?? null,
-      online: !!u.sessionId,
+      online: activeDeviceCount(u) > 0,
+      devices: activeDeviceCount(u),
+      deviceLimit: deviceLimit(u),
       sessionStartedAt: u.sessionStartedAt ?? null,
       sessionUserAgent: u.sessionUserAgent ?? null,
     })),
