@@ -185,22 +185,29 @@ function writeLocalStore(store: Store) {
 const K_USERS = "ch:users";
 const K_USERNAMES = "ch:usernames";
 const K_SEEDED = "ch:seeded";
+let remoteSeeded = false;
 
 function progressKey(userId: string) {
   return `ch:progress:${userId}`;
 }
 
 async function ensureRemoteSeeded(): Promise<void> {
-  if (await redis<string | null>(["GET", K_SEEDED])) return;
+  // Seeding happens once per database; after that, skip the round trip.
+  if (remoteSeeded) return;
+  if (await redis<string | null>(["GET", K_SEEDED])) {
+    remoteSeeded = true;
+    return;
+  }
 
   // Build the admin before claiming the flag: if credentials are missing this
   // throws and the flag stays unset, so seeding is retried once they are set.
   const admin = seedAdminUser();
   const claimed = await redis<string | null>(["SET", K_SEEDED, "1", "NX"]);
-  if (claimed !== "OK") return;
-
-  await redis(["HSET", K_USERS, admin.id, JSON.stringify(admin)]);
-  await redis(["HSET", K_USERNAMES, admin.username.toLowerCase(), admin.id]);
+  if (claimed === "OK") {
+    await redis(["HSET", K_USERS, admin.id, JSON.stringify(admin)]);
+    await redis(["HSET", K_USERNAMES, admin.username.toLowerCase(), admin.id]);
+  }
+  remoteSeeded = true;
 }
 
 async function remoteListUsers(): Promise<User[]> {

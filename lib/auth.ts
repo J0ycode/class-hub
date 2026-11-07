@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { findUserById, type User } from "./db";
@@ -66,7 +67,9 @@ export function verifyToken(token: string | undefined): TokenPayload | null {
  * elsewhere. A user has exactly one active session: signing in on another
  * device replaces the stored session id, and every older cookie stops matching.
  */
-export async function getSessionState(): Promise<{ user: User | null; kicked: boolean }> {
+// cache(): the layout and the page both resolve the session; within one request
+// this runs once, saving the duplicate database round trips.
+export const getSessionState = cache(async (): Promise<{ user: User | null; kicked: boolean }> => {
   const store = await cookies();
   const payload = verifyToken(store.get(COOKIE)?.value);
   if (!payload) return { user: null, kicked: false };
@@ -77,7 +80,7 @@ export async function getSessionState(): Promise<{ user: User | null; kicked: bo
     return { user: null, kicked: true };
   }
   return { user, kicked: false };
-}
+});
 
 export async function getSessionUser(): Promise<User | null> {
   return (await getSessionState()).user;
