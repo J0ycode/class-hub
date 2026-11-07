@@ -7,7 +7,7 @@
  *  - only the app icons and manifest are cached
  *  - if the network is gone, a small built-in offline page is shown
  */
-const VERSION = "2";
+const VERSION = "3";
 const CACHE = `class-hub-v${VERSION}`;
 const PRECACHE = ["/icons/icon-192.png", "/icons/icon-512.png", "/manifest.webmanifest"];
 
