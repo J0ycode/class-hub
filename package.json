@@ -1,0 +1,24 @@
+{
+  "name": "class-hub",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "catalogue": "node scripts/build-catalogue.mjs",
+    "upload:notes": "node scripts/upload-materials.mjs"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.2",
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.2"
+  }
+}

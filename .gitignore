@@ -1,0 +1,16 @@
+node_modules/
+.next/
+*.tsbuildinfo
+
+# runtime state — never commit
+data/store.json
+data/secret.key
+data/blob-uploaded.json
+
+# local environment
+.env
+.env.local
+.env.*.local
+
+*.log
+.DS_Store
