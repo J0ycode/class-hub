@@ -262,9 +262,32 @@ export default function Player({ videoId, yt, startAt, duration, initialPercent 
   function toggleFull() {
     const el = wrap.current;
     if (!el) return;
-    if (document.fullscreenElement) document.exitFullscreen?.();
-    else el.requestFullscreen?.();
+    if (document.fullscreenElement) {
+      document.exitFullscreen?.();
+      return;
+    }
+    if (isFull) {
+      setIsFull(false);
+      return;
+    }
+    // Native fullscreen where it exists (Android, desktop). iPhone Safari cannot
+    // fullscreen a div, so fall back to filling the screen with CSS.
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => setIsFull(true));
+    } else {
+      setIsFull(true);
+    }
   }
+
+  // Lock page scroll while the CSS fallback is covering the screen.
+  useEffect(() => {
+    if (!isFull || document.fullscreenElement) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isFull]);
 
   function onKey(e: React.KeyboardEvent) {
     if (e.key === " " || e.key === "k") {
@@ -274,6 +297,7 @@ export default function Player({ videoId, yt, startAt, duration, initialPercent 
     else if (e.key === "ArrowRight" || e.key === "l") seekTo(current + 10);
     else if (e.key === "m") toggleMute();
     else if (e.key === "f") toggleFull();
+    else if (e.key === "Escape" && isFull) setIsFull(false);
   }
 
   const shown = total || duration;
