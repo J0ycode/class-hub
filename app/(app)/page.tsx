@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { getProgress } from "@/lib/db";
 import { allVideos, getCatalogue } from "@/lib/catalogue";
 import { fmtDuration, fmtHours, subjectStats, timeAgo } from "@/lib/format";
+import { dailyQuote, greeting, studyStreak } from "@/lib/study";
 
 export const dynamic = "force-dynamic";
 
@@ -40,23 +41,71 @@ export default async function DashboardPage() {
     .slice(0, 5);
 
   const firstName = user.displayName.split(" ")[0];
+  const quote = dailyQuote();
+  const { streak, studiedToday } = studyStreak(progress);
+  const resume = continueItems[0];
+
+  const ringRadius = 60;
+  const ringLength = 2 * Math.PI * ringRadius;
 
   return (
     <>
-      <div className="page-head">
+      <section className="card desk">
         <div>
-          <div className="eyebrow">Overview</div>
-          <h1>Welcome back, {firstName}</h1>
+          <div className="eyebrow">{greeting()}</div>
+          <h1>
+            Welcome back, <em>{firstName}</em>
+          </h1>
           <p className="sub">
             {done === 0 && inProgress === 0
-              ? `${cat.totalVideos} classes across ${cat.subjects.length} subjects, all in one place.`
-              : `${cat.totalVideos - done} classes left. You have watched ${fmtHours(watchedSeconds)} so far.`}
+              ? `${cat.totalVideos} classes across ${cat.subjects.length} subjects are ready for you. Pick one and settle in.`
+              : `${cat.totalVideos - done} classes to go, and ${fmtHours(watchedSeconds)} already behind you. Keep the momentum.`}
           </p>
+          <blockquote className="quote">
+            “{quote.text}”<cite>— {quote.by}</cite>
+          </blockquote>
+          <div className="desk-actions">
+            {resume ? (
+              <Link className="btn primary" href={`/watch/${resume.video.id}`}>
+                ▶ Resume {resume.video.label}
+              </Link>
+            ) : (
+              <Link className="btn primary" href="/subjects">
+                Start studying →
+              </Link>
+            )}
+            <Link className="btn" href="/notes">
+              Open notes
+            </Link>
+          </div>
         </div>
-        <Link className="btn primary" href="/subjects">
-          Browse subjects →
-        </Link>
-      </div>
+
+        <div className="ring" role="img" aria-label={`Course progress ${overall} percent`}>
+          <svg viewBox="0 0 148 148" aria-hidden="true">
+            <defs>
+              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#8e9bff" />
+                <stop offset="100%" stopColor="#f3b76a" />
+              </linearGradient>
+            </defs>
+            <circle className="track" cx="74" cy="74" r={ringRadius} fill="none" strokeWidth="10" />
+            <circle
+              className="value"
+              cx="74"
+              cy="74"
+              r={ringRadius}
+              fill="none"
+              strokeWidth="10"
+              strokeDasharray={ringLength}
+              strokeDashoffset={ringLength * (1 - overall / 100)}
+            />
+          </svg>
+          <div className="ring-label">
+            <strong>{overall}%</strong>
+            <span>Course</span>
+          </div>
+        </div>
+      </section>
 
       <div className="grid stats">
         <div className="card">
@@ -73,12 +122,18 @@ export default async function DashboardPage() {
           <div className="stat-note">of {fmtHours(cat.totalSeconds)} total</div>
         </div>
         <div className="card">
-          <div className="stat-label">Course progress</div>
-          <div className="stat-value">{overall}%</div>
-          <div className="bar-row">
-            <div className="bar">
-              <span style={{ width: `${overall}%` }} />
-            </div>
+          <div className="stat-label">Study streak</div>
+          <div className="stat-value streak">
+            <span className="flame" aria-hidden="true">🔥</span>
+            {streak}
+            <span style={{ fontSize: 15, color: "var(--muted-2)", fontWeight: 600 }}>{streak === 1 ? " day" : " days"}</span>
+          </div>
+          <div className="stat-note">
+            {studiedToday
+              ? "You studied today. Lovely work."
+              : streak > 0
+                ? "Watch a class today to keep it alive."
+                : "Watch one class to start a streak."}
           </div>
         </div>
         <div className="card">

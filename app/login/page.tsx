@@ -25,8 +25,8 @@ export default async function LoginPage({
             <div className="brand-sub">S3 Earth CSE</div>
           </div>
         </div>
-        <h1>Sign in</h1>
-        <p className="sub">Your classes, notes and watch progress in one place.</p>
+        <h1>Welcome back</h1>
+        <p className="sub">Settle in. Your classes, notes and progress are right where you left them.</p>
         {kicked ? (
           <div className="notice">
             This account was signed in on another device, so this session was closed. Sign in again to take it back.
