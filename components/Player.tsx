@@ -294,7 +294,7 @@ export default function Player({ videoId, yt, startAt, duration, initialPercent 
           {/* Shield: blocks every click into YouTube's UI (title, logo, share, "watch on YouTube", suggestions). */}
           <button
             type="button"
-            className={`player-shield${!playing ? " paused" : ""}`}
+            className={`player-shield ${!started || ended ? "idle" : !playing ? "paused" : ""}`}
             onClick={toggle}
             aria-label={playing ? "Pause" : "Play"}
             disabled={!ready}

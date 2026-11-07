@@ -315,13 +315,16 @@ details[open] .caret { transform: rotate(180deg); }
 
 /* ---------- watch ---------- */
 .watch-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
-@media (max-width: 1150px) { .watch-grid { grid-template-columns: 1fr; } }
+.watch-grid > * { min-width: 0; }
+@media (max-width: 1150px) { .watch-grid { grid-template-columns: minmax(0, 1fr); } }
 .player-wrap {
   border-radius: 20px; overflow: hidden; border: 1px solid var(--line); background: #000;
   box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.95), 0 0 120px -50px rgba(243, 183, 106, 0.35);
 }
-.player-ratio { position: relative; padding-top: 56.25%; }
+.player-ratio { position: relative; padding-top: 56.25%; overflow: hidden; background: #000; }
 .player-ratio iframe, .player-ratio > div { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+/* Crop the embed slightly so YouTube's title bar, share button and logo fall outside the frame. */
+.player-ratio iframe { transform: scale(1.18); }
 .watch-title { font-family: var(--font-display); font-weight: 500; font-size: 26px; letter-spacing: -0.4px; margin: 22px 0 6px; line-height: 1.25; }
 .watch-sub { color: var(--muted); font-size: 13px; }
 .nav-btns { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
@@ -452,7 +455,10 @@ details[open] .caret { transform: rotate(180deg); }
   -webkit-tap-highlight-color: transparent;
 }
 /* Paused/ended: hide YouTube's pause screen ("More videos", title, share). */
-.player-shield.paused { background: radial-gradient(circle at center, rgba(11, 10, 16, 0.55), rgba(11, 10, 16, 0.92)); }
+/* Before the first play and at the end: solid, so no YouTube thumbnail or end screen shows. */
+.player-shield.idle { background: #0b0a10; }
+/* Paused mid-class: keep the last frame visible, softened. */
+.player-shield.paused { background: rgba(11, 10, 16, 0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
 .shield-center { display: grid; justify-items: center; gap: 12px; color: var(--text); }
 .big-play {
   width: 74px; height: 74px; border-radius: 50%; display: grid; place-items: center;
@@ -471,7 +477,7 @@ details[open] .caret { transform: rotate(180deg); }
 }
 .pc-seek::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px rgba(243, 183, 106, 0.35); }
 .pc-seek::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 50%; background: #fff; }
-.pc-row { display: flex; align-items: center; gap: 4px; }
+.pc-row { display: flex; align-items: center; flex-wrap: wrap; row-gap: 2px; gap: 4px; }
 .pc-btn {
   min-width: 38px; height: 38px; padding: 0 8px; display: grid; place-items: center;
   border: 0; border-radius: 10px; background: transparent; color: var(--text); cursor: pointer;
