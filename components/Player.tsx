@@ -204,7 +204,11 @@ export default function Player({ videoId, yt, startAt, duration, initialPercent 
       const d = p.getDuration() || duration;
       if (t > 0) send(t, d, true);
     };
-    const onFull = () => setIsFull(document.fullscreenElement === wrap.current);
+    const onFull = () => {
+      const on = document.fullscreenElement === wrap.current;
+      setIsFull(on);
+      if (!on) (screen.orientation as ScreenOrientation & { unlock?: () => void })?.unlock?.();
+    };
     window.addEventListener("pagehide", onHide);
     document.addEventListener("fullscreenchange", onFull);
 
@@ -259,11 +263,23 @@ export default function Player({ videoId, yt, startAt, duration, initialPercent 
     setMuted(!muted);
   }
 
-  function toggleFull() {
+  // Full screen like YouTube: the whole player (video + controls) goes full
+  // screen, and on phones it turns landscape. Android and desktop support this.
+  async function toggleFull() {
     const el = wrap.current;
     if (!el) return;
-    if (document.fullscreenElement) document.exitFullscreen?.();
-    else el.requestFullscreen?.();
+    if (document.fullscreenElement) {
+      await document.exitFullscreen?.().catch(() => undefined);
+      return;
+    }
+    try {
+      await el.requestFullscreen?.();
+      await (screen.orientation as ScreenOrientation & { lock?: (o: string) => Promise<void> })
+        ?.lock?.("landscape")
+        .catch(() => undefined);
+    } catch {
+      /* not supported on this device */
+    }
   }
 
   function onKey(e: React.KeyboardEvent) {
