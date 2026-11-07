@@ -5,12 +5,14 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import InstallButton from "@/components/InstallButton";
+import UpdateButton from "@/components/UpdateButton";
 
 type Props = {
   displayName: string;
   username: string;
   initials: string;
-  role: "admin" | "user";
+  role: "admin" | "moderator" | "user";
+  appVersion: string;
 };
 
 // 24px line icons, stroked with currentColor so they follow the link colour.
@@ -48,7 +50,7 @@ function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-export default function Sidebar({ displayName, username, initials, role }: Props) {
+export default function Sidebar({ displayName, username, initials, role, appVersion }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -139,6 +141,7 @@ export default function Sidebar({ displayName, username, initials, role }: Props
                 <div className="user-role">
                   @{username}
                   {role === "admin" ? <span className="role-pill">Admin</span> : null}
+                  {role === "moderator" ? <span className="role-pill">Moderator</span> : null}
                 </div>
               </div>
               <button type="button" className="icon-btn" onClick={logout} disabled={busy} aria-label="Sign out" title="Sign out">
@@ -146,6 +149,7 @@ export default function Sidebar({ displayName, username, initials, role }: Props
               </button>
             </div>
             <InstallButton />
+            <UpdateButton version={appVersion} />
             <button type="button" className="btn ghost signout-full" onClick={logout} disabled={busy}>
               {busy ? "Signing out…" : "Sign out"}
             </button>
