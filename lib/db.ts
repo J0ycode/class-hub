@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { hashPassword, newUserId } from "./password";
 import type { ProgressEntry } from "./types";
+import teacherSeed from "../data/teacher-seed.json";
 
 export type UserRole = "admin" | "moderator" | "user";
 
@@ -20,7 +21,7 @@ export function canManageMaterials(user: { role: UserRole }): boolean {
 export type TeacherNote = {
   id: string;
   subjectId: string;
-  module: number; // 1-4
+  module: number; // 1-4, or 0 for the General folder
   title: string;
   size: number;
   uploadedBy: string; // username
@@ -48,6 +49,7 @@ type Store = {
   users: User[];
   progress: Record<string, Record<string, ProgressEntry>>;
   teacherNotes: TeacherNote[];
+  teacherSeedBatches: string[];
 };
 
 const dataDir = path.join(process.cwd(), "data");
@@ -126,7 +128,7 @@ function requireBackend() {
  * ------------------------------------------------------------------ */
 
 function emptyStore(): Store {
-  return { users: [], progress: {}, teacherNotes: [] };
+  return { users: [], progress: {}, teacherNotes: [], teacherSeedBatches: [] };
 }
 
 function seedAdminUser(): User {
@@ -187,6 +189,7 @@ function readLocalStore(): Store {
     users: Array.isArray(parsed.users) ? parsed.users.map((u) => normalizeUser(u)) : [],
     progress: parsed.progress && typeof parsed.progress === "object" ? parsed.progress : {},
     teacherNotes: Array.isArray(parsed.teacherNotes) ? parsed.teacherNotes : [],
+    teacherSeedBatches: Array.isArray(parsed.teacherSeedBatches) ? parsed.teacherSeedBatches : [],
   };
 
   if (store.users.length === 0) {
@@ -646,8 +649,39 @@ export async function clearFailedLogins(key: string): Promise<void> {
 
 const K_TEACHER = "ch:teacher";
 
+// PDFs imported from the "S3 CS" folder (scripts/import-teacher-notes.mjs).
+const TEACHER_SEED_BATCH = "s3cs-1";
+let teacherSeedDone = false;
+
+/**
+ * Adds the seed notes to the database once. After that they are ordinary notes,
+ * so a moderator's delete sticks: the batch flag stops them being re-added.
+ */
+async function ensureTeacherSeeded(): Promise<void> {
+  if (teacherSeedDone) return;
+  const seed = teacherSeed as TeacherNote[];
+
+  if (usingRemoteStore()) {
+    const flag = `${K_TEACHER}:seeded:${TEACHER_SEED_BATCH}`;
+    if (!(await redis<string | null>(["GET", flag]))) {
+      await redis(["HSET", K_TEACHER, ...seed.flatMap((n) => [n.id, JSON.stringify(n)])]);
+      await redis(["SET", flag, "1"]);
+    }
+  } else {
+    const store = readLocalStore();
+    if (!store.teacherSeedBatches.includes(TEACHER_SEED_BATCH)) {
+      const existing = new Set(store.teacherNotes.map((n) => n.id));
+      store.teacherNotes.push(...seed.filter((n) => !existing.has(n.id)));
+      store.teacherSeedBatches.push(TEACHER_SEED_BATCH);
+      writeLocalStore(store);
+    }
+  }
+  teacherSeedDone = true;
+}
+
 export async function listTeacherNotes(subjectId?: string): Promise<TeacherNote[]> {
   requireBackend();
+  await ensureTeacherSeeded();
   let notes: TeacherNote[];
   if (usingRemoteStore()) {
     const flat = await redis<string[]>(["HGETALL", K_TEACHER]);
@@ -669,6 +703,7 @@ export async function listTeacherNotes(subjectId?: string): Promise<TeacherNote[
 
 export async function findTeacherNote(id: string): Promise<TeacherNote | undefined> {
   requireBackend();
+  await ensureTeacherSeeded();
   if (usingRemoteStore()) {
     const raw = await redis<string | null>(["HGET", K_TEACHER, id]);
     if (!raw) return undefined;

@@ -5,7 +5,8 @@ import { openTeacherFile, removeTeacherFile } from "@/lib/teacherFiles";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+// Some teacher PDFs are 30+ MB; give slow phone connections time to finish.
+export const maxDuration = 300;
 
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const user = await getApiUser();

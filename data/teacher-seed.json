@@ -1,0 +1,254 @@
+[
+ {
+  "id": "cb75147ca66346cd33c910dc",
+  "subjectId": "20",
+  "module": 1,
+  "title": "DSA Module 1",
+  "size": 17250956,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096000000
+ },
+ {
+  "id": "c56ad958a9d4bb26943db330",
+  "subjectId": "20",
+  "module": 2,
+  "title": "DSA Module 2",
+  "size": 2004031,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096001000
+ },
+ {
+  "id": "2826c38c4de99fc41bab0106",
+  "subjectId": "20",
+  "module": 3,
+  "title": "DSA Module 3",
+  "size": 2516827,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096002000
+ },
+ {
+  "id": "158a2cc6485f276f5011057f",
+  "subjectId": "20",
+  "module": 4,
+  "title": "DSA Module 4",
+  "size": 1429402,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096003000
+ },
+ {
+  "id": "994367d31c191c761bd746f5",
+  "subjectId": "20",
+  "module": 0,
+  "title": "Data Structures Lab Manual",
+  "size": 256536,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096004000
+ },
+ {
+  "id": "ee212f15a36d51d1a8f50951",
+  "subjectId": "88",
+  "module": 1,
+  "title": "DELD Module 1",
+  "size": 27466005,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096005000
+ },
+ {
+  "id": "f288e1d0cb17b0ddbd2c4ae1",
+  "subjectId": "88",
+  "module": 2,
+  "title": "DELD Module 2",
+  "size": 12056034,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096006000
+ },
+ {
+  "id": "a171fc39c13948f5b53b1a52",
+  "subjectId": "88",
+  "module": 3,
+  "title": "DELD Module 3 Notes",
+  "size": 16151514,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096007000
+ },
+ {
+  "id": "706297eab6d809b95af2e3db",
+  "subjectId": "88",
+  "module": 4,
+  "title": "DELD Module 4 Notes",
+  "size": 19477460,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096008000
+ },
+ {
+  "id": "ad276fe6b0a74cd6be837eb4",
+  "subjectId": "88",
+  "module": 4,
+  "title": "DELD Module 4: FSM and Verilog",
+  "size": 6236004,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096009000
+ },
+ {
+  "id": "71adc4f80eba461dda50118f",
+  "subjectId": "88",
+  "module": 0,
+  "title": "Digital Lab Manual",
+  "size": 4416906,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096010000
+ },
+ {
+  "id": "5f1a235b7d5c2f44993e00c6",
+  "subjectId": "7",
+  "module": 1,
+  "title": "Economics Module 1",
+  "size": 4312926,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096011000
+ },
+ {
+  "id": "402f2522b23cd3872c415f91",
+  "subjectId": "7",
+  "module": 1,
+  "title": "Elasticity of Demand: Theory and Problems",
+  "size": 740263,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096012000
+ },
+ {
+  "id": "9d937d27022448f5c310b3f0",
+  "subjectId": "7",
+  "module": 2,
+  "title": "Economics Module 2",
+  "size": 2960203,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096013000
+ },
+ {
+  "id": "6e8a6aee63a71c23f856b666",
+  "subjectId": "7",
+  "module": 2,
+  "title": "Economics Module 2 Problems",
+  "size": 698696,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096014000
+ },
+ {
+  "id": "86f9ef33d98c0aadd5d186a4",
+  "subjectId": "7",
+  "module": 2,
+  "title": "Break-even Analysis Notes",
+  "size": 1056962,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096015000
+ },
+ {
+  "id": "8825026a220cea7adefdb0f9",
+  "subjectId": "7",
+  "module": 3,
+  "title": "Economics Module 3",
+  "size": 3887521,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096016000
+ },
+ {
+  "id": "9cc2ace23df5d63346e244f3",
+  "subjectId": "7",
+  "module": 4,
+  "title": "Economics Module 4",
+  "size": 9561417,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096017000
+ },
+ {
+  "id": "0cc33336d6c1c2e9da755875",
+  "subjectId": "89",
+  "module": 0,
+  "title": "Syllabus",
+  "size": 748847,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096018000
+ },
+ {
+  "id": "2b2b2c7d78a7c33df3911ac6",
+  "subjectId": "19",
+  "module": 1,
+  "title": "OOP Module 1",
+  "size": 1741601,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096019000
+ },
+ {
+  "id": "92c0ea4b3b6c0f11c1949c07",
+  "subjectId": "19",
+  "module": 2,
+  "title": "OOP Module 2",
+  "size": 4587463,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096020000
+ },
+ {
+  "id": "a8382409fcbf7487a0e18619",
+  "subjectId": "19",
+  "module": 3,
+  "title": "OOP Module 3",
+  "size": 919955,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096021000
+ },
+ {
+  "id": "e8ab72d94ebce0466f226465",
+  "subjectId": "19",
+  "module": 4,
+  "title": "OOP Module 4",
+  "size": 1402851,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096022000
+ },
+ {
+  "id": "bd790bf513e0c93300d73486",
+  "subjectId": "90",
+  "module": 1,
+  "title": "TOC Module 1",
+  "size": 4951129,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096023000
+ },
+ {
+  "id": "ac7bfe81c3baf5135e104ae9",
+  "subjectId": "90",
+  "module": 2,
+  "title": "TOC Module 2",
+  "size": 35540993,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096024000
+ },
+ {
+  "id": "618b043bb0dbda5fa981a371",
+  "subjectId": "90",
+  "module": 3,
+  "title": "TOC Module 3",
+  "size": 925145,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096025000
+ },
+ {
+  "id": "7ac8058cf3bfdb127d341584",
+  "subjectId": "90",
+  "module": 4,
+  "title": "TOC Module 4 Part 1",
+  "size": 4712155,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096026000
+ },
+ {
+  "id": "b5cdeb1178dc6e6e8259d95e",
+  "subjectId": "90",
+  "module": 4,
+  "title": "TOC Module 4 Part 2",
+  "size": 19737250,
+  "uploadedBy": "admin",
+  "uploadedAt": 1794096027000
+ }
+]

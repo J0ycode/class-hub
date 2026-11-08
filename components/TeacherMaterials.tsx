@@ -94,18 +94,21 @@ export default function TeacherMaterials({
     }
   }
 
+  // Module 0 is the General folder (lab manuals, syllabus); shown only when it has files.
+  const sections = notes.some((n) => n.module === 0) ? [...MODULES, 0] : MODULES;
+
   return (
     <>
-      {MODULES.map((m, i) => {
+      {sections.map((m, i) => {
         const items = notes.filter((n) => n.module === m);
         return (
           <details key={m} className="module" open={i === 0}>
             <summary>
               <div className="mod-num" aria-hidden="true">
-                {m}
+                {m === 0 ? "G" : m}
               </div>
               <div style={{ minWidth: 0 }}>
-                <div className="mod-name">Module {m}</div>
+                <div className="mod-name">{m === 0 ? "General" : `Module ${m}`}</div>
                 <div className="mod-sub">
                   {items.length === 0 ? "No teacher notes yet" : `${items.length} ${items.length === 1 ? "note" : "notes"}`}
                 </div>
@@ -146,7 +149,7 @@ export default function TeacherMaterials({
             ))}
 
             {items.length === 0 && !canManage ? <div className="note-row tiny">Your teacher hasn’t added notes here yet.</div> : null}
-            {canManage ? <UploadForm subjectId={subjectId} moduleNo={m} /> : null}
+            {canManage && m > 0 ? <UploadForm subjectId={subjectId} moduleNo={m} /> : null}
           </details>
         );
       })}

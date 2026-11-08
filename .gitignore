@@ -8,6 +8,9 @@ data/secret.key
 data/blob-uploaded.json
 data/teacher/
 
+# source PDFs for the teacher-materials import (199 MB, live in Vercel Blob)
+S3 CS/
+
 # local environment
 .env
 .env.local
