@@ -149,9 +149,9 @@ export default async function SubjectPage({
                 </div>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                   {notes.map((n) => (
-                    <a key={n.id} className="chip" href={`/api/materials/${n.id}`} target="_blank" rel="noreferrer">
+                    <Link key={n.id} className="chip" href={`/read/notes/${n.id}`} prefetch={false}>
                       ▤ {n.title.replace(/\s*-\s*M\d+\s*$/i, "")}
-                    </a>
+                    </Link>
                   ))}
                 </div>
               </div>

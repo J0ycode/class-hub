@@ -696,7 +696,10 @@ export async function listTeacherNotes(subjectId?: string): Promise<TeacherNote[
   } else {
     notes = readLocalStore().teacherNotes;
   }
+  // Imported rows may hold their pre-compression size; the seed file has the current one.
+  const seedSize = new Map((teacherSeed as TeacherNote[]).map((n) => [n.id, n.size]));
   return notes
+    .map((n) => ({ ...n, size: seedSize.get(n.id) ?? n.size }))
     .filter((n) => !subjectId || n.subjectId === subjectId)
     .sort((a, b) => a.module - b.module || a.uploadedAt - b.uploadedAt);
 }

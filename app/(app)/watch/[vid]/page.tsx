@@ -76,11 +76,11 @@ export default async function WatchPage({ params }: { params: Promise<{ vid: str
                 <div className="tiny">Notes for {module.name}</div>
               </div>
               {notes.map((n) => (
-                <a key={n.id} className="note-row" href={`/api/materials/${n.id}`} target="_blank" rel="noreferrer">
+                <Link key={n.id} className="note-row" href={`/read/notes/${n.id}`} prefetch={false}>
                   <span className="pdf-badge">PDF</span>
                   <span style={{ flex: 1, minWidth: 0 }}>{n.title}</span>
-                  <span className="tiny">open ↗</span>
-                </a>
+                  <span className="tiny">open</span>
+                </Link>
               ))}
             </div>
           )}

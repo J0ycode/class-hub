@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import type { TeacherNote } from "@/lib/db";
@@ -121,12 +122,12 @@ export default function TeacherMaterials({
             {items.map((n, idx) => (
               <div key={n.id} className="note-row">
                 <span className="note-idx">{String(idx + 1).padStart(2, "0")}</span>
-                <a className="note-title" href={`/api/teacher-notes/${n.id}`} target="_blank" rel="noreferrer">
+                <Link className="note-title" href={`/read/teacher/${n.id}`} prefetch={false}>
                   {n.title}
                   <span className="tiny" style={{ display: "block", marginTop: 2 }}>
                     {fmtSize(n.size)} · by @{n.uploadedBy} · {timeAgo(n.uploadedAt)}
                   </span>
-                </a>
+                </Link>
                 <span className="pdf-badge">PDF</span>
                 {canManage ? (
                   <button

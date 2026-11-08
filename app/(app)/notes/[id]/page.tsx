@@ -91,11 +91,11 @@ export default async function SubjectNotesPage({
               </div>
             </summary>
             {m.notes.map((n, idx) => (
-              <a key={n.id} className="note-row" href={`/api/materials/${n.id}`} target="_blank" rel="noreferrer">
+              <Link key={n.id} className="note-row" href={`/read/notes/${n.id}`} prefetch={false}>
                 <span className="note-idx">{String(idx + 1).padStart(2, "0")}</span>
                 <span className="note-title">{n.title}</span>
                 <span className="pdf-badge">PDF</span>
-              </a>
+              </Link>
             ))}
           </details>
         ))

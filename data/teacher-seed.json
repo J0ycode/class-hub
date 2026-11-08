@@ -4,7 +4,7 @@
   "subjectId": "20",
   "module": 1,
   "title": "DSA Module 1",
-  "size": 17250956,
+  "size": 2697168,
   "uploadedBy": "admin",
   "uploadedAt": 1794096000000
  },
@@ -13,7 +13,7 @@
   "subjectId": "20",
   "module": 2,
   "title": "DSA Module 2",
-  "size": 2004031,
+  "size": 1898004,
   "uploadedBy": "admin",
   "uploadedAt": 1794096001000
  },
@@ -22,7 +22,7 @@
   "subjectId": "20",
   "module": 3,
   "title": "DSA Module 3",
-  "size": 2516827,
+  "size": 2209114,
   "uploadedBy": "admin",
   "uploadedAt": 1794096002000
  },
@@ -49,7 +49,7 @@
   "subjectId": "88",
   "module": 1,
   "title": "DELD Module 1",
-  "size": 27466005,
+  "size": 10839371,
   "uploadedBy": "admin",
   "uploadedAt": 1794096005000
  },
@@ -58,7 +58,7 @@
   "subjectId": "88",
   "module": 2,
   "title": "DELD Module 2",
-  "size": 12056034,
+  "size": 6842626,
   "uploadedBy": "admin",
   "uploadedAt": 1794096006000
  },
@@ -67,7 +67,7 @@
   "subjectId": "88",
   "module": 3,
   "title": "DELD Module 3 Notes",
-  "size": 16151514,
+  "size": 9367619,
   "uploadedBy": "admin",
   "uploadedAt": 1794096007000
  },
@@ -76,7 +76,7 @@
   "subjectId": "88",
   "module": 4,
   "title": "DELD Module 4 Notes",
-  "size": 19477460,
+  "size": 12925612,
   "uploadedBy": "admin",
   "uploadedAt": 1794096008000
  },
@@ -85,7 +85,7 @@
   "subjectId": "88",
   "module": 4,
   "title": "DELD Module 4: FSM and Verilog",
-  "size": 6236004,
+  "size": 3100820,
   "uploadedBy": "admin",
   "uploadedAt": 1794096009000
  },
@@ -94,7 +94,7 @@
   "subjectId": "88",
   "module": 0,
   "title": "Digital Lab Manual",
-  "size": 4416906,
+  "size": 3302561,
   "uploadedBy": "admin",
   "uploadedAt": 1794096010000
  },
@@ -103,7 +103,7 @@
   "subjectId": "7",
   "module": 1,
   "title": "Economics Module 1",
-  "size": 4312926,
+  "size": 3616778,
   "uploadedBy": "admin",
   "uploadedAt": 1794096011000
  },
@@ -112,7 +112,7 @@
   "subjectId": "7",
   "module": 1,
   "title": "Elasticity of Demand: Theory and Problems",
-  "size": 740263,
+  "size": 537997,
   "uploadedBy": "admin",
   "uploadedAt": 1794096012000
  },
@@ -121,7 +121,7 @@
   "subjectId": "7",
   "module": 2,
   "title": "Economics Module 2",
-  "size": 2960203,
+  "size": 2094078,
   "uploadedBy": "admin",
   "uploadedAt": 1794096013000
  },
@@ -130,7 +130,7 @@
   "subjectId": "7",
   "module": 2,
   "title": "Economics Module 2 Problems",
-  "size": 698696,
+  "size": 460784,
   "uploadedBy": "admin",
   "uploadedAt": 1794096014000
  },
@@ -139,7 +139,7 @@
   "subjectId": "7",
   "module": 2,
   "title": "Break-even Analysis Notes",
-  "size": 1056962,
+  "size": 538926,
   "uploadedBy": "admin",
   "uploadedAt": 1794096015000
  },
@@ -148,7 +148,7 @@
   "subjectId": "7",
   "module": 3,
   "title": "Economics Module 3",
-  "size": 3887521,
+  "size": 3527315,
   "uploadedBy": "admin",
   "uploadedAt": 1794096016000
  },
@@ -157,7 +157,7 @@
   "subjectId": "7",
   "module": 4,
   "title": "Economics Module 4",
-  "size": 9561417,
+  "size": 5192796,
   "uploadedBy": "admin",
   "uploadedAt": 1794096017000
  },
@@ -220,7 +220,7 @@
   "subjectId": "90",
   "module": 2,
   "title": "TOC Module 2",
-  "size": 35540993,
+  "size": 16002283,
   "uploadedBy": "admin",
   "uploadedAt": 1794096024000
  },
@@ -247,7 +247,7 @@
   "subjectId": "90",
   "module": 4,
   "title": "TOC Module 4 Part 2",
-  "size": 19737250,
+  "size": 8096231,
   "uploadedBy": "admin",
   "uploadedAt": 1794096027000
  }
